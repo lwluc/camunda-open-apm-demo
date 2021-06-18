@@ -1,0 +1,6 @@
+camunda.bpm.client:
+  base-url: http://camunda:7777/rest
+  async-response-timeout: 1000
+  worker-id: spring-boot-client
+
+logging.level.org.camunda.bpm.client: info
