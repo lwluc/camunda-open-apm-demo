@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+
+  camunda:
+    build: ./camunda-plattform-engine
+    mem_limit: 512M
+    depends_on:
+        - external-service
+    environment:
+      - INSPECTIT_SERVICE_NAME=camunda
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
+      - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    volumes:
+      - ./monitoring/inspectIT/agent:/opt/agent
+    entrypoint: [ "sh", "/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+    ports:
+      - 7777:7777
+    
+  external-service:
+    build: ./external-service
+    mem_limit: 512M
+    environment:
+      - INSPECTIT_SERVICE_NAME=external-service
+      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
+      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
+      - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    volumes:
+      - ./monitoring/inspectIT/agent:/opt/agent
+    entrypoint: [ "sh", "/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+    ports:
+      - 7788:7788
+  
+  influxdb:
+    image: influxdb:1.7.1
+    container_name: influxdb
+    environment:
+      - INFLUXDB_HTTP_FLUX_ENABLED=true
+      - INFLUXDB_HTTP_LOG_ENABLED=false
+      - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
+    mem_limit: 512M
+    volumes:
+      - ./monitoring/influx:/docker-entrypoint-initdb.d
+    ports:
+      - 8086:8086
+    
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - 9411:9411
+
+  grafana:
+    image: inspectit/grafana:servicegraph-v2.1
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=demo
+      - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+    volumes:
+      - ./monitoring/grafana/provisioning/influxdb:/usr/share/grafana/custom/
+    ports:
+      - 3001:3000
