@@ -2,11 +2,10 @@ camunda.bpm:
   admin-user:
     id: admin
     password: pw
-    firstName: Peter
-    last-name: Parker
-    email: peter@parker.com
   filter:
     create: All tasks
+  authorization:
+    enabled: true
   generic-properties:
     properties:
       initialize-telemetry: false

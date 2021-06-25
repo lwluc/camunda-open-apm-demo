@@ -31,13 +31,13 @@ services:
     ports:
       - 7788:7788
   
-  external-task-service:
-    build: ./external-task-service
+  micronaut-client:
+    build: ./micronaut-client
     mem_limit: 512M
     depends_on:
         - camunda
     environment:
-      - INSPECTIT_SERVICE_NAME=external-task-service
+      - INSPECTIT_SERVICE_NAME=micronaut-client
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans

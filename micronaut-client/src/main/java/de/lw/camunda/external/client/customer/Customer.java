@@ -1,4 +1,4 @@
-package de.lw.camunda.externalTaskService.customer;
+package de.lw.camunda.external.client.customer;
 
 import java.io.Serializable;
 
