@@ -2,6 +2,7 @@ version: "3.9"
 services:
 
   camunda:
+    image: lwluc/camunda-open-apm-demo:camudna
     build: ./camunda-plattform-engine
     mem_limit: 512M
     depends_on:
@@ -13,11 +14,12 @@ services:
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     volumes:
       - ./monitoring/inspectIT/agent:/opt/agent
-    entrypoint: [ "sh", "/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+    entrypoint: [ "sh", "/usr/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
     ports:
       - 7777:7777
     
   external-service:
+    image: lwluc/camunda-open-apm-demo:external-service
     build: ./external-service
     mem_limit: 512M
     environment:
@@ -27,11 +29,12 @@ services:
       - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     volumes:
       - ./monitoring/inspectIT/agent:/opt/agent
-    entrypoint: [ "sh", "/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+    entrypoint: [ "sh", "/usr/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
     ports:
       - 7788:7788
   
   micronaut-client:
+    image: lwluc/camunda-open-apm-demo:micronaut-client
     build: ./micronaut-client
     mem_limit: 512M
     depends_on:
@@ -45,7 +48,7 @@ services:
       - ./monitoring/inspectIT/agent:/opt/agent
     entrypoint: ["sh", "-c","
         ./dockerize -wait=tcp://camunda:7777 -timeout=360s -- &&
-        sh /app/entrypoint.sh /opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+        sh /usr/app/entrypoint.sh /opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
   
   influxdb:
     image: influxdb:1.7.1

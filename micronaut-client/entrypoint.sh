@@ -9,4 +9,4 @@ if [ -n "$JAVA_AGENT_PATH" ]; then
   java_command_options="-javaagent:$JAVA_AGENT_PATH"
 fi
 
-cd /app && java ${java_command_options}  -jar build/libs/micronaut-client-0.1-all.jar
+java ${java_command_options}  -jar /usr/app/application.jar

@@ -1,8 +1,14 @@
 FROM gradle:7.1.0-jdk11 AS build
-WORKDIR /app
-COPY . /app
+COPY --chown=gradle:gradle . /usr/src/app
+WORKDIR /usr/src/app
+RUN gradle build --no-daemon 
 
-RUN gradle build --no-daemon
+FROM openjdk:11-jre-slim
+
+RUN mkdir /app
+
+COPY --from=build /usr/src/app/entrypoint.sh /usr/app/entrypoint.sh
+COPY --from=build /usr/src/app/build/libs/micronaut-client-0.1-all.jar /usr/app/application.jar
 
 ADD https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz dockerize.tar.gz
 RUN tar xzf dockerize.tar.gz
