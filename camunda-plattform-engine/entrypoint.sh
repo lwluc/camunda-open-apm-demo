@@ -4,9 +4,9 @@ JAVA_AGENT_PATH=$1
 
 java_command_options=""
 
-if [ -n "$JAVA_AGENT_PATH" ]; then
-  echo Adding Agnet $JAVA_AGENT_PATH
-  java_command_options="-javaagent:$JAVA_AGENT_PATH"
+if [ ! -z "$JAVA_AGENT_ENABLED" ]; then
+  echo "Adding Agnet [$JAVA_AGENT_ENABLED]"
+  java_command_options="-javaagent:./inspectit-ocelot-agent.jar"
 fi
 
 java ${java_command_options}  -jar /usr/app/application.jar

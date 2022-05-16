@@ -2,7 +2,7 @@ version: "3.9"
 services:
 
   camunda:
-    image: lwluc/camunda-open-apm-demo:camudna
+    image: lwluc/camunda-open-apm-demo:camunda
     build: ./camunda-plattform-engine
     mem_limit: 512M
     depends_on:
@@ -11,10 +11,11 @@ services:
       - INSPECTIT_SERVICE_NAME=camunda
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    volumes:
-      - ./monitoring/inspectIT/agent:/opt/agent
-    entrypoint: [ "sh", "/usr/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
+    entrypoint: ["sh", "-c","
+        ./dockerize -wait=tcp://external-service:7788 -timeout=360s -- &&
+        sh /usr/app/entrypoint.sh"]
     ports:
       - 7777:7777
     
@@ -26,10 +27,9 @@ services:
       - INSPECTIT_SERVICE_NAME=external-service
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    volumes:
-      - ./monitoring/inspectIT/agent:/opt/agent
-    entrypoint: [ "sh", "/usr/app/entrypoint.sh", "/opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
+    entrypoint: [ "sh", "/usr/app/entrypoint.sh"]
     ports:
       - 7788:7788
   
@@ -39,19 +39,19 @@ services:
     mem_limit: 512M
     depends_on:
         - camunda
+        - external-service
     environment:
       - INSPECTIT_SERVICE_NAME=micronaut-client
       - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
       - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_ZIPKIN_URL=http://zipkin:9411/api/v2/spans
-    volumes:
-      - ./monitoring/inspectIT/agent:/opt/agent
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
+      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
     entrypoint: ["sh", "-c","
         ./dockerize -wait=tcp://camunda:7777 -timeout=360s -- &&
-        sh /usr/app/entrypoint.sh /opt/agent/inspectit-ocelot-agent-1.10.0.jar"]
+        sh /usr/app/entrypoint.sh"]
   
   influxdb:
-    image: influxdb:1.7.1
+    image: influxdb:1.8
     container_name: influxdb
     environment:
       - INFLUXDB_HTTP_FLUX_ENABLED=true
@@ -63,18 +63,20 @@ services:
     ports:
       - 8086:8086
     
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
+  jaeger:
+    image: jaegertracing/all-in-one:latest
     ports:
-      - 9411:9411
+      - 14268
+      - 16686
 
   grafana:
-    image: inspectit/grafana:servicegraph-v2.1
+    image: grafana/grafana:8.0.6
     container_name: grafana
     environment:
+      - GF_PANELS_DISABLE_SANITIZE_HTML=TRUE
       - GF_SECURITY_ADMIN_PASSWORD=demo
       - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
+      - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v4.0.2/novatec-sdg-panel.zip;novatec-sdg-panel
     volumes:
       - ./monitoring/grafana/provisioning/influxdb:/usr/share/grafana/custom/
     ports:

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.lw.camunda.engine</groupId>
-    <artifactId>camunda-plattform-engine</artifactId>
+    <artifactId>camunda-platform-engine</artifactId>
     <version>0.0.3</version>
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
@@ -52,7 +52,7 @@
     </dependencies>
 
     <build>
-        <finalName>camunda-plattform-engine</finalName>
+        <finalName>camunda-platform-engine</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

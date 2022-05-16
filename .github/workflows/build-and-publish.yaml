@@ -1,0 +1,55 @@
+name: Build & Push (Docker)
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  camunda-platform-build-and-push:
+    name: Build JAR and push Docker image
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        working-directory: ./camunda-platform-engine
+    env:
+      repo: lwluc/camunda-open-apm-demo
+    steps:
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p '${{ secrets.DOCKER_TOKEN }}'
+      - name: Build Docker image
+        run: docker build -t ${{env.repo}}-camunda .
+      - name: Publish Docker image
+        run: docker push ${{env.repo}}-camunda
+
+  external-service-build-and-push:
+    name: Build JAR and push Docker image
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        working-directory: ./external-service
+    env:
+      repo: lwluc/camunda-open-apm-demo
+    steps:
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p '${{ secrets.DOCKER_TOKEN }}'
+      - name: Build Docker image
+        run: docker build -t ${{env.repo}}-external-service .
+      - name: Publish Docker image
+        run: docker push ${{env.repo}}-external-service
+
+  micronaut-client-build-and-push:
+    name: Build JAR and push Docker image
+    runs-on: ubuntu-18.04
+    defaults:
+      run:
+        working-directory: ./micronaut-client
+    env:
+      repo: lwluc/camunda-open-apm-demo
+    steps:
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p '${{ secrets.DOCKER_TOKEN }}'
+      - name: Build Docker image
+        run: docker build -t ${{env.repo}}-micronaut-client .
+      - name: Publish Docker image
+        run: docker push ${{env.repo}}-micronaut-client

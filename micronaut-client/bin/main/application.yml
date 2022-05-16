@@ -1,0 +1,5 @@
+micronaut:
+  application:
+    name: micronautClient
+camunda.external-client:
+  base-url: http://camunda:7777/rest

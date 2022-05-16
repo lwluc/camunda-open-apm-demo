@@ -1,5 +1,5 @@
 # Camunda
 
-Camunda Plattform with an example process.
+Camunda Platform with an example process.
 
 You could login with `username: admin` and `password: pw`.
