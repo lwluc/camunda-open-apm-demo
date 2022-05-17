@@ -31,6 +31,6 @@ To start the docker container run `docker-compose up`.
 
 ![Architecture](./assets/camunda-open-apm-demo.png "Components and how they interact with each other").
 
-The image shows all components and how they communicate with each other. The [Camunda Platform Engine](./camunda-plattform-engine/) uses a [JavaDelegate]() to fetch data from the [Data Service](./external-service/). The [Mirconaut External Task Worker](./micronaut-client/) fetches task from the engine and loads data from the Data Service and store some information back to the engine.
+The image shows all components and how they communicate with each other. The [Camunda Platform Engine](./camunda-platform-engine/) uses a [JavaDelegate]() to fetch data from the [Data Service](./external-service/). The [Mirconaut External Task Worker](./micronaut-client/) fetches task from the engine and loads data from the Data Service and store some information back to the engine.
 
 To monitor all these components and their interactions I added a inspectIT Ocelot,  a JavaAgent, to each docker container they are running in. This Agent collects as much Infomaiton as you want using APM Tools like Jaeger, Grafana or Prometheus you could monitor and analyze them.

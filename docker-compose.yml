@@ -3,7 +3,7 @@ services:
 
   camunda:
     image: lwluc/camunda-open-apm-demo:camunda
-    build: ./camunda-plattform-engine
+    build: ./camunda-platform-engine
     mem_limit: 512M
     depends_on:
         - external-service
