@@ -4,80 +4,82 @@ services:
   camunda:
     image: lwluc/camunda-open-apm-demo:camunda
     build: ./camunda-platform-engine
-    mem_limit: 512M
     depends_on:
-        - external-service
+      - otel-collector
+      - external-service
     environment:
-      - INSPECTIT_SERVICE_NAME=camunda
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
-      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
+      - JAVA_AGENT_ENABLED=true
+      - OTEL_SERVICE_NAME=camunda
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     entrypoint: ["sh", "-c","
         ./dockerize -wait=tcp://external-service:7788 -timeout=360s -- &&
         sh /usr/app/entrypoint.sh"]
     ports:
-      - 7777:7777
+      - "7777:7777"
     
   external-service:
     image: lwluc/camunda-open-apm-demo:external-service
     build: ./external-service
-    mem_limit: 512M
+    depends_on:
+      - otel-collector
     environment:
-      - INSPECTIT_SERVICE_NAME=external-service
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
-      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
+      - JAVA_AGENT_ENABLED=true
+      - OTEL_SERVICE_NAME=external-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     entrypoint: [ "sh", "/usr/app/entrypoint.sh"]
     ports:
-      - 7788:7788
+      - "7788:7788"
   
   micronaut-client:
     image: lwluc/camunda-open-apm-demo:micronaut-client
     build: ./micronaut-client
-    mem_limit: 512M
     depends_on:
-        - camunda
-        - external-service
+      - otel-collector
+      - camunda
+      - external-service
     environment:
-      - INSPECTIT_SERVICE_NAME=micronaut-client
-      - INSPECTIT_EXPORTERS_METRICS_PROMETHEUS_ENABLED=false
-      - INSPECTIT_EXPORTERS_METRICS_INFLUX_URL=http://influxdb:8086
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_ENABLED=true
-      - INSPECTIT_EXPORTERS_TRACING_JAEGER_URL=http://jaeger:14268/api/traces
+      - JAVA_AGENT_ENABLED=true
+      - OTEL_SERVICE_NAME=micronaut-client
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     entrypoint: ["sh", "-c","
         ./dockerize -wait=tcp://camunda:7777 -timeout=360s -- &&
         sh /usr/app/entrypoint.sh"]
-  
-  influxdb:
-    image: influxdb:1.8
-    container_name: influxdb
-    environment:
-      - INFLUXDB_HTTP_FLUX_ENABLED=true
-      - INFLUXDB_HTTP_LOG_ENABLED=false
-      - INFLUXDB_DATA_QUERY_LOG_ENABLED=false
-    mem_limit: 512M
-    volumes:
-      - ./monitoring/influx:/docker-entrypoint-initdb.d
-    ports:
-      - 8086:8086
-    
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    ports:
-      - 14268
-      - 16686
 
-  grafana:
-    image: grafana/grafana:8.0.6
-    container_name: grafana
-    environment:
-      - GF_PANELS_DISABLE_SANITIZE_HTML=TRUE
-      - GF_SECURITY_ADMIN_PASSWORD=demo
-      - GF_PATHS_PROVISIONING=/usr/share/grafana/custom/
-      - GF_INSTALL_PLUGINS=https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/releases/download/v4.0.2/novatec-sdg-panel.zip;novatec-sdg-panel
+  otel-collector:
+    image: otel/opentelemetry-collector
+    container_name: otel-collector
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
     volumes:
-      - ./monitoring/grafana/provisioning/influxdb:/usr/share/grafana/custom/
+      - ./monitoring/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - 3001:3000
+      - "13133:13133"  # health_check extension
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP http receiver
+      - "8888:8888"   # Prometheus metrics exposed by the collector
+      - "8889:8889"   # Prometheus exporter metrics
+      - "1888:1888"   # pprof extension
+    depends_on:
+      - jaeger-all-in-one
+      - zipkin-all-in-one
+
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger-all-in-one
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+
+  zipkin-all-in-one:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin-all-in-one
+    ports:
+      - "9411:9411"
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"

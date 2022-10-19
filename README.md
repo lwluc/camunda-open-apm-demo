@@ -1,10 +1,10 @@
 # Camunda + Open APM  <!-- omit in toc -->
 
-A small demo to show how you can monitor Camunda and the surrounding systems with Open Source Application Performance Management (APM) tools ([openapm.io](https://openapm.io)).
+A small demo to show how you can monitor Camunda and the surrounding systems with Open Source Application Performance Management (APM) tools.
 
 The landscape we use:
 
-[![openapm.io](./assets/openapm-io-landscape.png "openapm.io1")](https://openapm.io/landscape?agent=inspectit-ocelot-agent&collector=zipkin-server&storage=influx-db&visualization=zipkin-server&dashboarding=grafana&alerting=grafana&showCommercial=true&showFormats=false)
+![Architecture](./assets/camunda-open-apm-demo.png "Components and how they interact with each other").
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -14,10 +14,9 @@ The landscape we use:
 
 ## ✨ Features
 
-- Grafana Dashboard, e.g. http://localhost:3001/  
-  You could log in as User with **username** `admin` and **password** `demo`
-
-- Jaeger UI: http://localhost:16686/
+- Jaeger at http://localhost:16686
+- Zipkin at http://localhost:9411
+- Prometheus at http://localhost:9090
 
 You can start the Camunda example process manually via the Camunda [Tasklist](http://localhost:7777/camunda/app/tasklist/), login as user with **username** `admin` and **password** `pw`.
 
@@ -33,4 +32,4 @@ To start the docker container run `docker-compose up`.
 
 The image shows all components and how they communicate with each other. The [Camunda Platform Engine](./camunda-platform-engine/) uses a [JavaDelegate]() to fetch data from the [Data Service](./external-service/). The [Mirconaut External Task Worker](./micronaut-client/) fetches task from the engine and loads data from the Data Service and store some information back to the engine.
 
-To monitor all these components and their interactions I added a inspectIT Ocelot,  a JavaAgent, to each docker container they are running in. This Agent collects as much Infomaiton as you want using APM Tools like Jaeger, Grafana or Prometheus you could monitor and analyze them.
+To monitor all these components and their interactions I added the [OTEL Java Agent](https://opentelemetry.io/docs/instrumentation/java/) to each docker container they are running in. The Agent collects as much information as you want. Using APM Tools like Jaeger, Zipkin or Prometheus you could monitor and analyze them.

@@ -5,8 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import static de.lw.camunda.engine.Utils.isRunningInsideDocker;
-
 @Service
 public class CustomerService {
 
@@ -15,9 +13,7 @@ public class CustomerService {
     public CustomerService() {}
 
     public Customer fetchData() {
-        String host = isRunningInsideDocker() ? "external-service" : "localhost";
-        final String baseURI = "http://%s:7788/customers/1";
-        String uri = String.format(baseURI, host);
+        final String uri = "http://external-service:7788/customers/1";
         log.info("Fetch data from uri {}", uri);
 
         RestTemplate restTemplate = new RestTemplate();
