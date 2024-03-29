@@ -7,14 +7,14 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
-  logging:
+  debug:
 
   zipkin:
     endpoint: "http://zipkin-all-in-one:9411/api/v2/spans"
     format: proto
 
   otlphttp/jaeger:
-    endpoint: "http://jaeger-all-in-one:4317"
+    endpoint: "http://jaeger-all-in-one:4318"
     tls:
       insecure: true
 
@@ -34,8 +34,8 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, zipkin, otlphttp/jaeger]
+      exporters: [debug, zipkin, otlphttp/jaeger]
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, prometheus]
+      exporters: [debug, prometheus]
