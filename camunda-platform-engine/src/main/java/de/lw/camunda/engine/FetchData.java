@@ -2,6 +2,7 @@ package de.lw.camunda.engine;
 
 import de.lw.camunda.engine.customer.Customer;
 import de.lw.camunda.engine.customer.CustomerService;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ public class FetchData implements JavaDelegate {
         this.fetchDataService = fetchDataService;
     }
 
+    @WithSpan
     @Override
     public void execute(DelegateExecution delegateExecution) throws Exception {
         log.info("Fetching Data from Service");

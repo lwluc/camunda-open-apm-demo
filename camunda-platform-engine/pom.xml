@@ -12,6 +12,7 @@
 
     <properties>
         <camunda.version>7.15.0</camunda.version>
+        <opentelemetry.instrumentation.annotations.verion>2.2.0</opentelemetry.instrumentation.annotations.verion>
     </properties>
 
     <dependencyManagement>
@@ -48,6 +49,11 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+            <version>${opentelemetry.instrumentation.annotations.verion}</version>
         </dependency>
     </dependencies>
 
